@@ -2,3 +2,5 @@ env/
 .env
 6. RAG/.cache
 6. RAG/files
+FULLSTACKGPT PROJECTS/.cache
+FULLSTACKGPT PROJECTS/.streamlit
