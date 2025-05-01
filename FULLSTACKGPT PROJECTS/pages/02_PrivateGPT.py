@@ -29,8 +29,8 @@ def embed_file(file):
     cache_dir = LocalFileStore(f"./.cache/embeddings/{file.name}")
     splitter = CharacterTextSplitter.from_tiktoken_encoder(
         separator="\n",
-        chunk_size=400,
-        chunk_overlap=50,
+        chunk_size=600,
+        chunk_overlap=100,
     )
     loader = UnstructuredFileLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
@@ -61,8 +61,8 @@ def save_message(message, role):
     st.session_state["messages"].append({"message": message, "role": role})
 
 class ChatcallbackHandler(BaseCallbackHandler):
-
     message = ""
+
     def on_llm_start(self, *args, **kwargs):
         # 빈 위젯 생성
         self.message_box = st.empty()
@@ -93,7 +93,7 @@ st.markdown(
 
 # 모델 설정
 llm_model = ChatOllama(
-    model= "llama3.1:8b",
+    model= "mistral:latest",
     temperature=0.1,
     streaming=True,
     callbacks=[
@@ -101,26 +101,22 @@ llm_model = ChatOllama(
     ],
 )
 
-chat_memory = ConversationSummaryBufferMemory(
-    llm = llm_model,
-    max_token_limit = 120,
-    memory_key = "chat_history",
-    return_messages = True,
-)
+# chat_memory = ConversationSummaryBufferMemory(
+#     llm = llm_model,
+#     max_token_limit = 120,
+#     memory_key = "chat_history",
+#     return_messages = True,
+# )
 
 # stuff 방식 prompt
-prompt = ChatPromptTemplate.from_messages([
-    ("system",
+prompt = ChatPromptTemplate.from_template(
+    """Answer the question using ONLY the following context and not your training data. If you don't know the answer just say you don't know. DON'T make anything up.
+    
+    Context: {context}
+    Question:{question}
     """
-    You are a helpful AI talking to a human.
-    Answer the question using ONLY the following context and chat history.
-    If you don't know the answer, just say you don't know.
-    DON'T make anything up.
-    context: {context}
-    """),
-    ("human","{question}"),
+)
 
-])
 
 # 파일 업로드 부분
 with st.sidebar:
